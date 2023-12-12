@@ -23,6 +23,7 @@ public class GraphProcessor {
 
     // include instance variables here
     HashMap<Point, HashSet<Point>> map;
+    Point[] points;
 
     public GraphProcessor() {
         map = new HashMap<>();
@@ -42,7 +43,7 @@ public class GraphProcessor {
         String[] firstLine = scanner.nextLine().split(" ");
         int numVerts = Integer.parseInt(firstLine[0]);
         int numEdges = Integer.parseInt(firstLine[1]);
-        Point[] points = new Point[numVerts];
+        points = new Point[numVerts];
         for (int i = 0; i < numVerts; i++) {
             String[] line = scanner.nextLine().split(" ");
             Point newPoint = new Point(Double.parseDouble(line[1]), Double.parseDouble(line[2]));
@@ -87,14 +88,14 @@ public class GraphProcessor {
      */
     public Point nearestPoint(Point p) {
         Point minPoint = null;
-        int minDistance = Integer.MAX_VALUE;
-        if (map.containsKey(p)) {
-            for (Point p2 : map.keySet()) {
-                if (!p.equals(p2)) {
-                    if (p.distance(p2) < minDistance) {
-                        minDistance = (int) p.distance(p2);
-                        minPoint = p2;
-                    }
+        double minDistance = Double.MAX_VALUE;
+
+        for (Point p2 : points) {
+            if (!p.equals(p2)) {
+                double distance = p.distance(p2);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    minPoint = p2;
                 }
             }
         }
@@ -168,13 +169,13 @@ public class GraphProcessor {
      *                                  or because start equals end.
      */
     public List<Point> route(Point start, Point end) throws IllegalArgumentException {
-        if (!connected(start, end) || start.equals(end)) {
+        if (!connected(start, end) || start.equals(end) || start == null || end == null) {
             throw new IllegalArgumentException("No path between start and end");
         }
         Map<Point, Double> pathDistances = new HashMap<>();
         Comparator<Point> comparator = (a, b) -> (int) (pathDistances.get(a) - pathDistances.get(b));
         PriorityQueue<Point> queue = new PriorityQueue<>(comparator);
-        Map<Point, Point> thePath = new HashMap<>();
+        Map<Point, Point> shortestPath = new HashMap<>();
 
         Point currentPoint = start;
         queue.add(currentPoint);
@@ -187,19 +188,20 @@ public class GraphProcessor {
                 if (!pathDistances.containsKey(neighbor)
                         || pathDistances.get(neighbor) > (pathDistances.get(currentPoint) + currentDist)) {
                     pathDistances.put(neighbor, pathDistances.get(currentPoint) + currentDist);
-                    thePath.put(currentPoint, neighbor);
+                    shortestPath.put(neighbor, currentPoint);
                     queue.add(neighbor);
                 }
             }
         }
 
         ArrayList<Point> finalPath = new ArrayList<>();
-        Point current = start;
-        while (!current.equals(end)) {
+        Point current = end;
+        while (!current.equals(start) && shortestPath.containsKey(current)) {
             finalPath.add(current);
-            current = thePath.get(current);
+            current = shortestPath.get(current);
         }
-        finalPath.add(end);
+        finalPath.add(start);
+        Collections.reverse(finalPath);
         return finalPath;
     }
 
