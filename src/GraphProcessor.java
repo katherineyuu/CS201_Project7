@@ -25,7 +25,6 @@ public class GraphProcessor {
     HashMap<Point, HashSet<Point>> map;
 
     public GraphProcessor() {
-        // TODO initialize instance variables
         map = new HashMap<>();
     }
 
@@ -46,7 +45,7 @@ public class GraphProcessor {
         Point[] points = new Point[numVerts];
         for (int i = 0; i < numVerts; i++) {
             String[] line = scanner.nextLine().split(" ");
-            Point newPoint = new Point(Integer.parseInt(line[1]), Integer.parseInt(line[2]));
+            Point newPoint = new Point(Double.parseDouble(line[1]), Double.parseDouble(line[2]));
             points[i] = newPoint;
             map.put(newPoint, new HashSet<Point>());
         }
